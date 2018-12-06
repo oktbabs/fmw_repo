@@ -1,0 +1,42 @@
+
+
+setenvFmw(){
+
+export SOFTWAREDIR=/media/sf_LINUX_ORASOFT
+export ORACLE_BASE=/u01/app/oracle
+export MW_HOME=$ORACLE_BASE/product/fmw
+export JAVA_VERSION=jdk1.8.0_131
+export JAVA_HOME=$ORACLE_BASE/product/java/$JAVA_VERSION
+
+export PATH=$JAVA_HOME/bin:$MW_HOME/oracle_common/common/bin:$PATH:.
+}
+
+createFmwFolder(){
+sudo mkdir -p $MW_HOME
+sudo chmod -R 777 $MW_HOME
+sudo chown -R oracle:oinstall $MW_HOME
+
+}
+createoraInventory(){
+
+sudo mkdir -p  $ORACLE_BASE/oraInventory
+sudo cd $ORACLE_BASE/oraInventory
+
+sudo echo inventory_loc=$ORACLE_BASE >oraInst.loc
+sudo echo inst_group=oinstall >>oraInst.loc
+
+sudo chown -R oracle:oinstall $ORACLE_BASE/oraInventory
+}
+
+install_java(){
+
+echo " ---- Installing Java -----"
+echo
+
+cp -r ${SOFTWAREDIR}/jdk1.8.0_131 ${ORACLE_BASE}/product/java/
+}
+
+setenvFmw
+createFmwFolder
+createoraInventory
+install_java

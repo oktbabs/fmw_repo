@@ -1,0 +1,325 @@
+OHS INSTALL
+---------------
+/media/sf_LINUX_ORASOFT/12C_Response_Folder/fmw_12.2.1.3.0_ohs_linux64.bin  -invPtrLoc /u01/app/oracle/oraInventory/oraInst.loc -ignoreSysPrereqs -jreLoc /u01/app/oracle/product/java/jdk1.8.0_131
+
+-----------------------------------------------------------------------
+OID INSTALL
+---------------
+/media/sf_LINUX_ORASOFT/12C_Response_Folder/fmw_12.2.1.3.0_oid_linux64.bin  -invPtrLoc /u01/app/oracle/oraInventory/oraInst.loc -ignoreSysPrereqs -jreLoc /u01/app/oracle/product/java/jdk1.8.0_131
+
+-----------------------------------------------------------------------
+nohup /u01/app/oracle/admin/system/nodemanager/startNodeManager.sh &
+
+tail -f nohup.out
+-----------------------------------------------------------------------------
+
+Extract OSB componenets
+--------------------------
+
+OLD UAT
+--------
+cd
+
+mkdir -p /home/techdev/olduatWLSTFolder/uatWLST
+
+/u01/app/mwh/oracle_common/common/bin/wlst.sh
+
+configToScript('/u01/app/mwh/user_projects/domains/UATOSB01','/home/techdev/olduatWLSTFolder/uatWLST')
+
+
+
+UAT
+-----
+cd
+
+mkdir -p /home/oracle/newUATWLSTFolder/uatWLST
+
+/u01/app/oracle/product/fmw12213/oracle_common/common/bin/wlst.sh
+
+configToScript('/u01/app/oracle/admin/aservers/UATOSB01','/home/oracle/newUATWLSTFolder/uatWLST')
+
+---------------------
+
+ sed -i 's/u01\/app\/mwh/u01\/app\/oracle\/product\/fmw/g' *.xml
+
+ sed -i 's/opt\/jdk1.8.0_112/u01\/app\/oracle\/product\/jdk1.8.0_112/g' *.xml
+
+ sed -i 's/u01\/app\/oracle\/product\/fmw\/user_projects\/domains\/UATOSB01/u01\/app\/oracle\/admin\/aservers\/UATOSB01/g' *.xml
+
+--------------------------------------
+
+
+ sed -i 's/u01\/app\/mwh/u01\/app\/oracle\/product\/fmw/g' *.sh
+
+ sed -i 's/opt\/jdk1.8.0_112/u01\/app\/oracle\/product\/jdk1.8.0_112/g' *.sh
+
+ sed -i 's/u01\/app\/oracle\/product\/fmw\/user_projects\/domains\/UATOSB01/u01\/app\/oracle\/admin\/aservers\/UATOSB01/g' *.sh
+
+----------------------------------------------------------------------------------------------------------------------------------------
+OSB DOMAIN - UAT
+-----------------------------------------------
+
+OSBHOST1 ADMINSERVER
+--------------------
+
+/u01/app/oracle/product/fmw12213/oracle_common/common/bin/wlst.sh
+
+startNodeManager(verbose='true', NodeManagerHome='/u01/app/oracle/admin/aservers/osb_domain/nodemanager', ListenPort='6666', ListenAddress='vanilla01-nodemgrvhn.mycompany.com')
+
+nmConnect('weblogic', 'Kala8Kuta', 'vanilla01-nodemgrvhn.mycompany.com', '6666', 'osb_domain', '/u01/app/oracle/admin/aservers/osb_domain','ssl')
+
+nmStart('AdminServer')
+
+connect('weblogic', 'Kala8Kuta','t3://vanilla01-adminvhn.mycompany.com:7001')
+
+nmEnroll('/u01/app/oracle/admin/aservers/osb_domain','/u01/app/oracle/admin/aservers/osb_domain/nodemanager')
+
+
+----------------------------------------------------------------------
+OSBHOST1 MS1
+------------
+
+
+/u01/app/oracle/product/fmw12213/oracle_common/common/bin/wlst.sh
+
+
+
+startNodeManager(verbose='true', NodeManagerHome='/u01/app/oracle/admin/mservers/osb_domain/nodemanager', ListenPort='5556', ListenAddress='vanilla01-nodemgrvhn.mycompany.com')
+
+
+nmConnect('weblogic', 'Kala8Kuta', 'vanilla01-nodemgrvhn.mycompany.com', '5556', 'osb_domain', '/u01/app/oracle/admin/mservers/osb_domain','ssl')
+
+connect('weblogic', 'Kala8Kuta','t3://vanilla01-adminvhn.mycompany.com:7001')
+
+nmEnroll('/u01/app/oracle/admin/mservers/osb_domain','/u01/app/oracle/admin/mservers/osb_domain/nodemanager')
+
+
+start('osb_server1', 'Server')
+
+
+Logging:
+
+/u01/app/oracle/admin/runtime/logs
+------------------------------------------------------------------------------------------------------------------------------------------------------
+
+OSBHOST1 MS2
+------------
+
+/u01/app/oracle/product/fmw12213/oracle_common/common/bin/wlst.sh
+
+
+
+startNodeManager(verbose='true', NodeManagerHome='/u01/app/oracle/admin/mservers/osb_domain/nodemanager', ListenPort='5556', ListenAddress='vanilla02-nodemgrvhn.mycompany.com')
+
+
+nmConnect('weblogic', 'Kala8Kuta', 'vanilla02-nodemgrvhn.mycompany.com', '5556', 'osb_domain', '/u01/app/oracle/admin/mservers/osb_domain','ssl')
+
+connect('weblogic', 'Kala8Kuta','t3://vanilla01-adminvhn.mycompany.com:7001')
+
+nmEnroll('/u01/app/oracle/admin/mservers/osb_domain','/u01/app/oracle/admin/mservers/osb_domain/nodemanager')
+
+
+
+start('osb_server2', 'Server')
+
+
+
+Logging:
+
+/u01/app/oracle/admin/runtime/logs
+
+
+
+
+PACK
+====
+
+/u01/app/oracle/product/fmw12213/oracle_common/common/bin/pack.sh -managed=true  -domain=/u01/app/oracle/admin/aservers/osb_domain  -template=/home/oracle/osb_domaindomaintemplate.jar -template_name=osb_domain_template
+
+
+
+
+UNPACK
+======
+
+/u01/app/oracle/product/fmw12213/oracle_common/common/bin/unpack.sh -domain=/u01/app/oracle/admin/mservers/osb_domain  -template=/home/oracle/osb_domaindomaintemplate.jar  -overwrite_domain=true -app_dir=/u01/app/oracle/admin/mservers/osb_domain/applications
+
+
+DIP SETUP
+-------------
+nohup /u01/app/oracle/admin/aservers/dip_domain/bin/startNodeManager.sh &
+
+/u01/app/oracle/product/fmw12213/oracle_common/common/bin/wlst.sh
+
+nmConnect('weblogic', 'P0f0r@cl3', 'localhost', '5556', 'dip_domain', '/u01/app/oracle/admin/aservers/dip_domain','ssl')
+
+nmStart('AdminServer')
+
+connect('weblogic','P0f0r@cl3','t3://ohsserver01.mycompany.com:7001')
+
+nmEnroll('/u01/app/oracle/admin/aservers/dip_domain','/u01/app/oracle/admin/aservers/dip_domain/nodemanager')
+
+
+oid_setup(orcladminPassword='P0f0r@cl3',odsPassword='P0f0r@cl3',realmDN='dc=mycompany,dc=com')
+
+----------------------------------------------------------------------------------------------------------
+
+
+OID SETUP
+-------------
+nohup /u01/app/oracle/admin/aservers/oid_domain/bin/startNodeManager.sh &
+
+/u01/app/oracle/product/fmw12213/oracle_common/common/bin/wlst.sh
+
+nmConnect('weblogic', 'P0f0r@cl3', 'localhost', '5566', 'oid_domain', '/u01/app/oracle/admin/aservers/oid_domain','ssl')
+
+nmStart('AdminServer')
+
+connect('weblogic','P0f0r@cl3','t3://ohsserver01.mycompany.com:7007')
+
+nmEnroll('/u01/app/oracle/admin/aservers/oid_domain','/u01/app/oracle/admin/aservers/oid_domain/nodemanager')
+
+start(name='oid1')
+
+oid_setup(orcladminPassword='P0f0r@cl3',odsPassword='P0f0r@cl3',realmDN='dc=mycompany,dc=com')
+
+oid_listInstances()
+
+oid_instanceStatus(instanceName='oid1')
+oid_getProperties(context='EM')
+
+oid_createRealm(instanceName='oid1', host='ohsserver01.mycompany.com', port = 3060, orcladminPassword = 'P0f0r@cl3', realmDN ='dc=mycompany,dc=com')
+
+oid_setAdminPassword(orcladminPassword = 'passwd', odsPassword = 'passwd')
+
+where, orcladminPassword -orcladmin password
+odsPassword is database password.
+-----------------------------------------------------------------------
+OHS SETUP
+-------------
+
+nohup /u01/app/oracle/admin/aservers/ohs_domain/bin/startNodeManager.sh &
+
+/u01/app/oracle/product/fmw12213/oracle_common/common/bin/wlst.sh
+nmConnect('weblogic', 'P0f0r@cl3', 'localhost', '5556', 'ohs_domain', '/u01/app/oracle/admin/aservers/ohs_domain','ssl')
+
+nmStart('AdminServer')
+
+connect('weblogic','P0f0r@cl3','t3://ohsserver01.mycompany.com:7001')
+
+nmEnroll('/u01/app/oracle/admin/aservers/ohs_domain','/u01/app/oracle/admin/aservers/ohs_domain/nodemanager')
+
+ohs_createInstance(instanceName='ohs1', machine='OHSHOST1')
+
+ 
+
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------
+# OAM DOMAIN - oelvmapps01
+#-----------------------------------------------
+
+/u01/app/oracle/product/fmw12213/oracle_common/common/bin/wlst.sh
+nmConnect('weblogic', 'P0f0r@cl3', 'oelvmapps01-nodemgrvhn.mycompany.com', '6666', 'oam_domain', '/u01/app/oracle/admin/aservers/oam_domain','ssl')
+
+nmStart('AdminServer')
+
+connect('weblogic','P0f0r@cl3','t3://oelvmapps01-adminvhn.mycompany.com:7005')
+
+nmEnroll('/u01/app/oracle/admin/aservers/oam_domain','/u01/app/oracle/admin/aservers/system/oam_domain/nodemanager')
+
+
+start('oam_server1', 'Server')
+
+start('oam_policy_mgr1', 'Server')
+
+start('odsm_server1', 'Server')
+
+----------------------------------------------------------------------------------------------------------------------------------------
+OIM DOMAIN - fmwServer01
+-----------------------------------------------
+
+/u01/app/oracle/product/fmw12213/oracle_common/common/bin/wlst.sh
+nmConnect('weblogic', 'P0f0r@cl3', 'fmwServer01-nodemgrvhn.mycompany.com', '5556', 'oim_domain', '/u01/app/oracle/admin/aservers/oim_domain','ssl')
+
+nmStart('AdminServer')
+
+connect('weblogic','P0f0r@cl3','t3://fmwServer01-adminvhn.mycompany.com:7001')
+
+nmEnroll('/u01/app/oracle/admin/aservers/oim_domain','/u01/app/oracle/admin/aservers/system/oim_domain/nodemanager')
+
+start('soa_server1', 'Server')
+
+start('oim_server1', 'Server')
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+SOA DOMAIN - oelvmapps01
+-----------------------------------------------
+
+/u01/app/oracle/product/fmw12213/oracle_common/common/bin/wlst.sh
+
+nmConnect('weblogic','P0f0r@cl3', 'oelvmapps01-nodemgrvhn.mycompany.com','5556','soa_domain','/u01/app/oracle/admin/aservers/soa_domain')
+
+nmStart('AdminServer')
+
+connect('weblogic','P0f0r@cl3','t3://oelvmapps01-adminvhn.mycompany.com:7001')
+
+nmEnroll('/u01/app/oracle/admin/aservers/soa_domain','/u01/app/oracle/admin/system/soa_domain/nodemanager')
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+OAM DOMAIN
+-----------
+
+/u01/app/oracle/product/fmw12213/oracle_common/common/bin/wlst.sh
+nmConnect('weblogic', 'P0f0r@cl3', 'fmwServer01-nodemgrvhn.mycompany.com', '6666', 'oam_domain', '/u01/app/oracle/admin/aservers/oam_domain','ssl')
+
+nmStart('AdminServer')
+
+connect('weblogic','P0f0r@cl3','t3://fmwServer01-adminvhn.mycompany.com:7005')
+
+nmEnroll('/u01/app/oracle/admin/aservers/oam_domain','/u01/app/oracle/admin/aservers/system/oam_domain/nodemanager')
+
+---------------------------------------------------------------------------------------------------------------------------
+
+
+mkdir -p /u01/app/oracle/admin/aservers/oim_domain/servers/oim_server1/security
+
+echo "username=weblogic" >/u01/app/oracle/admin/aservers/oim_domain/servers/oim_server1/security/boot.properties
+echo "password=P0f0r@cl3" >>/u01/app/oracle/admin/aservers/oim_domain/servers/oim_server1/security/boot.properties
+
+-------------------------------------------------------------------------------------------------------------------------------
+
+-Dtangosol.coherence.wka1=fmwServer01-soahost1-vip.mycompany.com -Dtangosol.coherence.wka2=fmwServer02-soahost2-vip.mycompany.com -Dtangosol.coherence.localhost=fmwServer01-soahost1-vip.mycompany.com
+
+-Dtangosol.coherence.wka1=fmwServer02-soahost2-vip.mycompany.com -Dtangosol.coherence.wka2=fmwServer01-soahost1-vip.mycompany.com -Dtangosol.coherence.localhost=fmwServer02-soahost2-vip.mycompany.com
+
+
+
+reassociateSecurityStore(domain="your_domain", servertype="DB_ORACLE",datasourcename="jdbc/opss-ds", jpsroot="cn=jpsTestNode", join="false")
+
+
+
+
+1. Run WLST.
+/u01/app/oracle/product/fmw12213/oracle_common/common/bin/wlst.sh
+
+2. Connect AdminServer using connect() WLST command.
+
+connect('weblogic','P0f0r@cl3','t3://fmwServer01-adminvhn.mycompany.com:7001')
+
+3. Run setAuditRepository() WLST command.
+
+setAuditRepository(logDirectory="/u01/app/oracle/admin/aservers/runtime/logs")
+
+By these steps, "audit.logDirectory" parameter will be added to "audit.db" element in jps-config-jse.xml.
+
+Example of jps-config-jse.xml:
+
+
+
+cd /u01/app/oracle/product/fmw12213/oracle_common/common/bin
+./wlst.sh /u01/app/oracle/product/fmw12213/Oracle_IDM2/common/tools/configureSecurityStore.py -d /u01/app/oracle/admin/aservers/oam_domain -c IAM -p P0f0r@cl3 -m create
+ 
+
+ 

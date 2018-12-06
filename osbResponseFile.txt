@@ -1,0 +1,16 @@
+[ENGINE] 
+Response File Version=1.0.0.0.0
+[GENERIC]
+SPECIFY_DOWNLOAD_LOCATION=false
+SKIP_SOFTWARE_UPDATES=true
+SOFTWARE_UPDATES_DOWNLOAD_LOCATION=
+ORACLE_HOME=/u01/app/oracle/product/fmw/Oracle_OSB1
+MIDDLEWARE_HOME=/u01/app/oracle/product/fmw
+CUSTOM TYPE=true
+Oracle Service Bus Examples=true
+Oracle Service Bus IDE=true
+WL_HOME=/u01/app/oracle/product/fmw/wlserver_10.3
+OEPE_HOME=/u01/app/oracle/product/fmw/oepe111180
+[SYSTEM]
+[APPLICATIONS]
+[RELATIONSHIPS]

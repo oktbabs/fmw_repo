@@ -1,0 +1,18 @@
+<?xml version=”1.0” encoding=”UTF-8” ?>
+<domain-template-descriptor>
+ <input-fields>
+   <!--  Installation dir   -->
+   <data-value name=”USER_INSTALL_DIR" value=”c:\Program Files\Java\jrockit-R26.0.0-jdk1.5.0_04” />
+   <!-- 
+      Install Public JRE
+        This option is available in Windows IA32 JDK installer 
+   --> 
+   <data-value name=”INSTALL_PUBLIC_JRE” value=”true” /> 
+   <!-- 
+      Optionally install Mercury profiling tools (not valid for JRockit 1.4.2),
+         possible values “true”,”yes”,”false” and “no”.
+         The default value for this option is “true”.
+   -->
+  <data-value name=”INSTALL_MERCURY_PROFILING_TOOLS” value=”true” />  
+ </input-fields>
+</domain-template-descriptor>

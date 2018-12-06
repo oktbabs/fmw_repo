@@ -1,0 +1,22 @@
+
+Start Admin NodeManager
+-----------------------
+
+nohup /u01/app/oracle/admin/aservers/osb_domain/bin/startNodeManager.sh &
+
+sleep 10
+
+nohup /u01/app/oracle/admin/aservers/osb_domain/startWebLogic.sh &
+
+
+sleep 10
+
+nohup /u01/app/oracle/admin/mservers/osb_domain/bin/startNodeManager.sh &
+
+----------------------------------------------------------------------------------
+# SERVER 2
+#------------
+
+nohup /u01/app/oracle/admin/mservers/osb_domain/bin/startNodeManager.sh &
+
+

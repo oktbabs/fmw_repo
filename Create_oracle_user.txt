@@ -1,0 +1,10 @@
+groupadd dba
+groupadd oinstall
+useradd -m -g oinstall -G dba oracle
+passwd oracle
+
+mkdir -p /u01/app/oracle
+chown -R oracle:oinstall /u01/app
+chmod -R 775 /u01/app
+ls -ld /u01/app
+ 
